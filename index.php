@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <?php
 
+//Proizvodi
 class Artical {
 
     private $id;
@@ -38,7 +39,49 @@ function getAllArticals() { //
     return $niz;
 }
 
-$rezultat = getAllArticals();
+//Komentari
+class Comment {
+
+    private $idCom;
+    private $name;
+    private $email;
+    private $comment;
+    private $approved;
+
+    public function __get($nazivPolja) {  // nazivPolja se odnosi na dohvatanje svih vrednosti
+        return $this->$nazivPolja;      // koje imamo u klasi
+    }
+
+    public function __construct($idCom, $name, $email, $comment, $approved) {
+
+        $this->idCom = $idCom;
+        $this->name = $name;
+        $this->email = $email;
+        $this->comment = $comment;
+        $this->approved = $approved;
+    }
+
+}
+
+function getAllComments() { //
+    $konekcija = mysqli_connect(
+            "localhost", "root", "", "citrus");
+    $sql = "select * from comments";
+    $rezultat = mysqli_query($konekcija, $sql);  //ILI  $rezultat = $konekcija->query($sql); kao objekat
+
+    $niz = [];
+    while ($red = $rezultat->fetch_array()) {
+        $niz[] = new Comment($red['idCom'],
+                $red['name'],
+                $red['email'],
+                $red['comment'],
+                $red['approved']);
+    }
+    return $niz;
+}
+
+$artikli = getAllArticals();
+$komentari = getAllComments();
 /* var_dump($rezultat);
 
   echo $rezultat[0]->{'id'};
@@ -114,16 +157,16 @@ $rezultat = getAllArticals();
     <div class="row">
         <?php
         $i = 0;
-        foreach ($rezultat as $el) {
+        foreach ($artikli as $el) {
             ?>
 
             <div class = "col-xl-4 col-sm-6 mt-4">
                 <div class = "card h-100">
-                    <img class = "card-img-top" src = "images/<?php echo $rezultat[$i]->{'img'}; ?>" alt = "Pomorandza">
+                    <img class = "card-img-top" src = "images/<?php echo $artikli[$i]->{'img'}; ?>" alt = "Pomorandza">
                     <div class = "card-body">
-                        <h5 class = "card-title"><?php echo $rezultat[$i]->{'name'};
+                        <h5 class = "card-title"><?php echo $artikli[$i]->{'name'};
             ?></h5>
-                        <p class="card-text"><?php echo $rezultat[$i]->{'desc'}; ?> </p>
+                        <p class="card-text"><?php echo $artikli[$i]->{'desc'}; ?> </p>
                         <p class="card-text"><small class="text-muted">Na lageru</small></p>
                     </div>
                 </div>
@@ -267,15 +310,31 @@ Kraj komentara - sekcije sa Proizvodima-->
         <h2 class="display-5">Drugi o nama...</h2>
     </div>
     <ul class="list-group list-group-flush">
-        <li class="list-group-item d-flex justify-content-between">An item <span class="text-muted">2018</span></li>
-        <li class="list-group-item d-flex justify-content-between">A second item <span
-                class="text-muted">2019</span></li>
-        <li class="list-group-item d-flex justify-content-between">A third item <span class="text-muted">2019</span>
-        </li>
-        <li class="list-group-item d-flex justify-content-between">A fourth item <span
-                class="text-muted">2020</span></li>
-        <li class="list-group-item d-flex justify-content-between">And a fifth one <span
-                class="text-muted">2021</span></li>
+
+        <?php
+        $i = 0;
+        foreach ($komentari as $el) {
+            if ($komentari[$i]->{'approved'} === "ok") {
+                ?>
+                <li class="list-group-item d-flex justify-content-between"><?php echo $komentari[$i]->{'comment'}; ?>
+                    <span class="text-muted"><?php echo $komentari[$i]->{'name'}; ?></span></li>
+
+                <?php
+            }
+            $i++;
+        }
+        ?>
+
+        <!-- Ovo je visak nakon stavljanja ispisa u PHP blok
+                <li class="list-group-item d-flex justify-content-between">A second item <span
+                        class="text-muted">2019</span></li>
+                <li class="list-group-item d-flex justify-content-between">A third item <span class="text-muted">2019</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">A fourth item <span
+                        class="text-muted">2020</span></li>
+                <li class="list-group-item d-flex justify-content-between">And a fifth one <span
+                        class="text-muted">2021</span></li>
+        -->
     </ul>
 </div>
 
